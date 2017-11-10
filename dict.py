@@ -4,8 +4,9 @@ import random
 import re
 import requests
 from bs4 import BeautifulSoup
-
-
+import copy
+import json
+from Tkinter import *
 
 def randHeader():
     head_connection = ['Keep-Alive', 'close']
@@ -85,9 +86,207 @@ def queryWords(word):
     trans_data = [li.text.strip() for li in trans_li]
     return trans_data
 
+class learning_statistics():
+    def __init__(self):
+        pass
+    
+class App(object):
+    '''
+    '''
+    def __init__(self, master=None, **kwargs):
+        
+        #Frame.__init__(self, master)
+        self.root = master
+        w, h = self.root.maxsize()
+        self.root.geometry("{}x{}".format(w, h)) 
+        
+        self.frame = Frame(self.root)
+        self.frame.pack(expand=1, fill=BOTH)
+        
+        #self.state = False
+        #self.root.bind("<F10>", self.toggle_fullscreen)
+        #self.root.bind("<Escape>", self.end_fullscreen)
+        
+        self.init_variables()
+        self.prepare_vocabulary()
+        self.init_ui()
+        
+    def toggle_fullscreen(self, event=None):
+        self.state = not self.state  # Just toggling the boolean
+        self.root.attributes("-fullscreen", self.state)
+        return "break"
 
+    def end_fullscreen(self, event=None):
+        self.state = False
+        self.root.attributes("-fullscreen", False)
+        return "break"
+    
+    def init_variables(self):
+        self.word_current = StringVar()
+        
+        self.word_opt_1 = StringVar() 
+        self.word_opt_2 = StringVar()
+        self.word_opt_3 = StringVar()
+        self.word_opt_4 = StringVar()
+        self.word_opt_5 = StringVar()
+        self.word_opt_1.set('option 1')
+        self.word_opt_2.set('option 2')
+        self.word_opt_3.set('option 3')
+        self.word_opt_4.set('option 4') 
+        self.word_opt_5.set('option 5')
+        
+    def init_ui(self):
+        '''
+        '''
+        self.lab_word = Label(self.frame, textvariable=self.word_current, height=2, fg="light green", bg="dark green", anchor='center', font = "Helvetica 72 bold")
+        self.lab_word.pack(side=TOP,fill=BOTH,expand=1)
+        self.lab_word.bind("<Button-1>",self.change_case)
+        
+        self.lab_opt_1 = Label(self.frame, textvariable=self.word_opt_1, relief='solid',justify='left',bg='lightgray',wraplength=180, width=20, height=20, anchor='nw')
+        self.lab_opt_1.pack(side=LEFT,expand=1, fill=BOTH)
+        self.lab_opt_1.bind("<Button-1>",self.change_case)
+        
+        self.lab_opt_2 = Label(self.frame, textvariable=self.word_opt_2, relief='solid',justify='left', bg='lightgray',wraplength=180, width=20, height=20, anchor='nw')
+        self.lab_opt_2.pack(side=LEFT, fill=BOTH, expand=1)
+        self.lab_opt_2.bind("<Button-1>",self.change_case)
+        
+        self.lab_opt_3 = Label(self.frame, textvariable=self.word_opt_3, relief='solid',justify='left', bg='lightgray',wraplength=180, width=20, height=20, anchor='nw')
+        self.lab_opt_3.pack(side=LEFT, fill=BOTH, expand=1)
+        self.lab_opt_3.bind("<Button-1>",self.change_case)
+        
+        self.lab_opt_4 = Label(self.frame, textvariable=self.word_opt_4,relief='solid',justify='left', bg='lightgray',wraplength=180, width=20, height=20, anchor='nw')
+        self.lab_opt_4.pack(side=LEFT, fill=BOTH, expand=1)
+        self.lab_opt_4.bind("<Button-1>",self.change_case)
+        
+        self.lab_opt_5 = Label(self.frame, textvariable=self.word_opt_5,relief='solid',justify='left', bg='lightgray',wraplength=180, width=20, height=20, anchor='nw')
+        self.lab_opt_5.pack(side=LEFT, fill=BOTH, expand=1)
+        self.lab_opt_5.bind("<Button-1>",self.change_case)
+        
+        self.display_options(self.get_temp_group(self.index_current))
+    def prepare_vocabulary(self):
+        '''
+        '''
+        fp = file('lesson_1.json','r')  
+        vul = json.loads(fp.read())
+        '''
+        for k, v in vul.items():
+            print
+            print k
+            for j in v:
+                #print j.encode('utf-8')
+                print j
+            print
+            print '==========='
+        '''
+        self.index_max = len(vul)
+        self.index_current = 0
+        self.words = vul.keys()
+        self.translations = vul.values()
+        self.word_current.set( self.words[self.index_current])
+        
+
+  
+  
+        #print random.sample(vul.keys(),5)
+        #print random.sample(vul.values(),5)
+        #self.word_opt_2.set(''.join([s.strip()+'\r\n' for s in random.choice(self.translations)]))
+    def display_options(self, temp_group_translations):
+        self.word_opt_1.set(''.join([s.strip()+'\r\n' for s in temp_group_translations[0]]))
+        self.word_opt_2.set(''.join([s.strip()+'\r\n' for s in temp_group_translations[1]]))
+        self.word_opt_3.set(''.join([s.strip()+'\r\n' for s in temp_group_translations[2]]))
+        self.word_opt_4.set(''.join([s.strip()+'\r\n' for s in temp_group_translations[3]]))
+        self.word_opt_5.set(''.join([s.strip()+'\r\n' for s in temp_group_translations[4]]))
+        self.lab_opt_1["bg"] = 'gray'
+        self.lab_opt_2["bg"] = 'gray'
+        self.lab_opt_3["bg"] = 'gray'
+        self.lab_opt_4["bg"] = 'gray'
+        self.lab_opt_5["bg"] = 'gray'
+    def get_temp_group(self, index_current):
+        temp_words = copy.deepcopy(self.words)
+        temp_word = temp_words.pop(index_current)
+        temp_translations = copy.deepcopy(self.translations)
+        temp_translation = temp_translations.pop(index_current)
+
+        temp_group_translations = random.sample(temp_translations,4)
+        temp_group_translations.append(temp_translation)
+        random.shuffle(temp_group_translations)
+        return temp_group_translations
+    def convert_vocabulary(self,filename):
+        '''
+        fobj = open('lesson_1','r')
+        dic = {}
+        for line in fobj:
+            print
+            print line
+            li = queryWords(line)
+            
+            li2=[]
+            for l in li:
+                l.encode('utf-8')
+                print l
+                li2.append(l)
+            print
+            dic[line] = li2
+            #i = raw_input("===================")
+            #if i == 'q':
+                #break
+        fobj.close()
+        #js = json.dumps(dic)
+        jsfile = open('lesson_1.json','w')
+        jsfile.write(json.dumps(dic))
+        jsfile.close()
+        '''
+        
+    def change_case(self, event=None):
+        '''
+        '''
+        if event.widget == self.lab_word:
+            if self.index_current < self.index_max - 1:
+                self.index_current = self.index_current + 1
+            else:
+                self.index_current = 0
+            print self.index_current               
+            self.word_current.set( self.words[self.index_current])
+            self.display_options(self.get_temp_group(self.index_current))
+            #self.lab_word.config(text=new_text)
+        if event.widget == self.lab_opt_1:
+            if self.word_opt_1.get() == ''.join([s.strip()+'\r\n' for s in self.translations[self.index_current]]):
+                self.lab_opt_1["bg"] = 'darkgreen'
+            else:
+                self.lab_opt_1["bg"] = 'darkred'
+        if event.widget == self.lab_opt_2:
+            if self.word_opt_2.get() == ''.join([s.strip()+'\r\n' for s in self.translations[self.index_current]]):
+                self.lab_opt_2["bg"] = 'darkgreen'
+            else:
+                self.lab_opt_2["bg"] = 'darkred'
+        if event.widget == self.lab_opt_3:
+            if self.word_opt_3.get() == ''.join([s.strip()+'\r\n' for s in self.translations[self.index_current]]):
+                self.lab_opt_3["bg"] = 'darkgreen'
+            else:
+                self.lab_opt_3["bg"] = 'darkred'
+        if event.widget == self.lab_opt_4:
+            if self.word_opt_4.get() == ''.join([s.strip()+'\r\n' for s in self.translations[self.index_current]]):
+                self.lab_opt_4["bg"] = 'darkgreen'
+            else:
+                self.lab_opt_4["bg"] = 'darkred'
+        if event.widget == self.lab_opt_5:
+            if self.word_opt_5.get() == ''.join([s.strip()+'\r\n' for s in self.translations[self.index_current]]):
+                self.lab_opt_5["bg"] = 'darkgreen'
+            else:
+                self.lab_opt_5["bg"] = 'darkred'
+        
 if __name__ == '__main__':
-    li = queryWords('abc')
-    for l in li:
-        l.encode('utf-8')
-        print l
+    # create the application
+    root=Tk()
+    myapp = App(root)
+
+    #
+    # here are method calls to the window manager class
+    #
+    #myapp.master.title("My Vocabulary Application")
+    #myapp.master.maxsize(1000, 600)
+
+    # start the program
+    #myapp.mainloop()
+    root.mainloop()
+
